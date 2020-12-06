@@ -1,3 +1,6 @@
+
+\d .baum
+
 / construct treetable
 construct:{[t;g;p;a]r[1#0],g xasc 1_e:(r:root[t;g;a])block[t;g;a]/visible p}
 
@@ -17,7 +20,8 @@ constraint:{[p]flip(in;key p;flip enlist value p)}
 / construct root block
 root:{[t;g;a]
  a[g]:nul,'g;
- (`n_,g)xcols node_[`;g]flip enlist each?[t;();();a]}
+ (`n_,g)xcols node_[`;g]flip enlist each?[t;();();a]
+ }
 
 / construct a block = node or leaf
 block:{[t;g;a;r;p]
@@ -29,7 +33,7 @@ block:{[t;g;a;r;p]
 node:{[b;t;g;a;p]
  c:constraint p;
  a[h]:first,'h:(i:g?b)#g;
- a[h]:{`},'h:(1+i)_g;
+ a[h]:{first 1#0#x},'h:(1+i)_g;
  s:?[t;c;enlist[b]!enlist b;a];
  node_[b;g]0!s
  }
@@ -122,7 +126,7 @@ tbaum:{[t;formula;l]
  P:([]n:enlist(0#`)!first 0#/:t G;v:enlist 1b); 
  n:raze {((,) scan key x)#\:x}@'{first@'parsea x}@'l;
  P:1!P,([]n;v:1b);
- 1!construct[T;G;P;A]
+ 1!construct[t;G;P;A]
  }
 
 sort:{[formula;t]
