@@ -7,7 +7,8 @@ args:.Q.def[`name`port!("treetable.q";8888);].Q.opt .z.x
 \e 1
 
 / construct treetable
-construct:{[t;g;p;a]1!`n_ xasc root[t;g;a]block[t;g;a]/visible p}
+construct:{[t;g;p;a]r[1#0],g xasc 1_e:(r:root[t;g;a])block[t;g;a]/visible p}
+
 
 / visible paths
 visible:{[p]
@@ -24,7 +25,7 @@ constraint:{[p]flip(in;key p;flip enlist value p)}
 / construct root block
 root:{[t;g;a]
  a[g]:nul,'g;
- (`n_,g)xcols node_[g]flip enlist each?[t;();();a]}
+ (`n_,g)xcols node_[`;g]flip enlist each?[t;();();a]}
 
 / construct a block = node or leaf
 block:{[t;g;a;r;p]
@@ -32,18 +33,23 @@ block:{[t;g;a;r;p]
  r,(`n_,g)xcols f[t;g;a;p]}
 
 / construct node block
+
 node:{[b;t;g;a;p]
  c:constraint p;
  a[h]:first,'h:(i:g?b)#g;
  a[h]:{`},'h:(1+i)_g;
  s:?[t;c;enlist[b]!enlist b;a];
- node_[g]0!s}
+ node_[b;g]0!s
+ }
 
 / compute n_ for node block
-node_:{[g;t]
+node_:{[b;g;t]
+ num:sum reverse sums reverse b=g;
  f:{x where not null x};
- n:$[count g;f each flip flip[t]g;enlist til 0];
- ![t;();0b;enlist[`n_]!2 enlist/n]}
+ n:$[count g;num#/:r:flip flip[t]g;enlist til 0];
+ if[n~enlist ();n:enlist 0#r . 0 0];
+ ![t;();0b;enlist[`n_]!2 enlist/n]
+ }
 
 / construct leaf block
 leaf:{[t;g;a;p]
@@ -122,25 +128,58 @@ pblock:{[t;g;a;p]
 // example run
 
 / generate data for the base table t
-(:)c:count first m:1000#'flip cross/[(`a`b`c`d`e`;`f`g`h`i`j`k`l`m;`n`o`p`q)]
+(:)c:count first m:1000#'flip cross/[(`a`b`c`d`e`;`f`g`h`i`j`k`l`m`;`n`o`p`q)]
 (:)T:([]A:m 0;B:m 1;C:m 2;D:c?.z.D + til 3;v:c?1000;w:c#`x`y`z`w)
-
+T
 / dimensions to group on (we can vary the order and number)
-G:`A`B`C`D
+G:`D`A`B`C
 G:`A`B`C
 
 / rollups (nul is the default rollup)
 A:`counts`v`w!((count;`v);(sum;`v);(nul;`w))
 
 / initial state
-P:([n:enlist(0#`)!0#`]v:enlist 1b)
+(:)P:([n:enlist(0#`)!0#`]v:enlist 1b)
+(:)P:([n:enlist(0#`)!0#0nd]v:enlist 1b)
 
 / we can drill into T
 (:)P1:P                            / initial state
 (:)R1:construct[T;G;P1;A]			/ construct root and children 
-(:)P2:openat[P1;G;`a]              / open at A=a
+(:)P2:openat[P1;G;2020.12.05]              / open at A=a
 (:)R2:construct[T;G;P2;A]			/ construct with one node open
-(:)P3:openat[P2;G;`a`f]			/ open at A=a,B=f
+
+tsort[R2;1#`counts;1#idesc]
+
+
+
+
+I:tsort[R2;1#`counts;1#idesc]
+1!(0!R2)I
+
+`t`c`o set' (R2;1#`counts;1#idesc)
+
+(0!t) 3 4 0 1 2 5 6 7 8 9
+
+tsort:{[t;c;o]
+ n:exec n_ from t;
+ i:children[parent n]except enlist();
+ j:msort[0!t;c;o]each i;
+ I:n?pmesh over n j;
+ 1!(0!t)I
+ }
+
+tsort[1!(0!t) 3 4 0 1 2 5 6 7 8 9;1#`counts;1#idesc]
+
+parent:{[n]
+ n?-1_'n
+ }
+
+([]num:til count n;n;p:parent n)
+
+
+
+
+(:)P3:openat[P2;G;``]			/ open at A=a,B=f
 (:)R3:construct[T;G;P3;A]			/ construct with two nodes open
 (:)P4:openat[P3;G;`a`f`n]			/ open at A=a,B=f,C=x
 (:)R4:construct[T;G;P4;A]			/ construct with two nodes open
