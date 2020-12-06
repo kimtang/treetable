@@ -4,14 +4,29 @@ args:.Q.def[`name`port!("treetable.q";8888);].Q.opt .z.x
 / treetable.q:localhost:8888::
 { if[not x=0; @[x;"\\\\";()]]; value"\\p 8888"; } @[hopen;`:localhost:8888;0];
 
-\l treetable.q
+\l baum.q
 
 (:)c:count first m:1000#'flip cross/[(`a`b`c`d`e`;`f`g`h`i`j`k`l`m`;`n`o`p`q)]
 (:)T:([]A:m 0;B:m 1;C:m 2;D:c?.z.D + til 3;E:c?til 6;v:c?1000;w:c#`x`y`z`w)
 
+.baum.tbaum[T;"A,E,D,B,C ~~ counts:count v,v:sum v,w:.baum.nul w"] .baum.open[""] ()
+
+.baum.sort["counts:idesc"] .baum.tbaum[T;"A,E,D,B,C ~~ counts:count v,v:sum v,w:.baum.nul w"] .baum.open[""] ()
+
+.baum.sort["counts:idesc"] .baum.tbaum[T;"A,E,D,B,C ~~ counts:count v,v:sum v,w:.baum.nul w"] .baum.open["A:`a"] ()
+
+.baum.sort["counts:idesc"] .baum.tbaum[T;"A,E,D,B,C ~~ counts:count v,v:sum v,w:.baum.nul w"] .baum.open["A:`a,E:4"] ()
+
 .baum.sort["counts:idesc"] .baum.tbaum[T;"A,E,D,B,C ~~ counts:count v,v:sum v,w:.baum.nul w"] .baum.open["A:`a,E:4"] .baum.open["A:`b"] ()
 
-.baum.sort["D:idesc"] .baum.tbaum[T;"D,A,B,C ~~ counts:count v,v:sum v,w:.baum.nul w"] .baum.open[""] ()
+
+.baum.tbaum[T;"D,A,E,B,C ~~ counts:count v,v:sum v,w:.baum.nul w"] .baum.open[""] ()
+
+.baum.sort["counts:idesc"] .baum.tbaum[T;"D,A,E,B,C ~~ counts:count v,v:sum v,w:.baum.nul w"] .baum.open[""] ()
+
+.baum.sort["counts:idesc"] .baum.tbaum[T;"D,A,E,B,C ~~ counts:count v,v:sum v,w:.baum.nul w"] .baum.open["D:2020.12.07"] ()
+
+.baum.sort["counts:idesc"] .baum.tbaum[T;"D,A,E,B,C ~~ counts:count v,v:sum v,w:.baum.nul w"] .baum.open["D:2020.12.07,A:`b"] ()
 
 
 / 
