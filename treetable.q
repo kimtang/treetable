@@ -88,7 +88,9 @@ tsort:{[t;c;o]
  n:exec n_ from t;
  i:children[parent n]except enlist();
  j:msort[0!t;c;o]each i;
- n?pmesh over n j}
+ I:n?pmesh over n j;
+ 1!(0!t)I
+ }
 
 / parent-vector > child-list
 children:{[p]@[(2+max p)#enlist();first[p],1+1_p;,;til count p]}
@@ -115,6 +117,31 @@ valid:{[p;g]
  i:where til[count g]{(count[y]#x)~y}/:g?/:n;
  1!(0!p)i}
 
+
+parsec:{ parse["select from t where ", x]2}
+parseb:{ parse["select by ",x," from t"]3}
+parsea:{ parse["select ",x," from t"]4}
+
+open:{[formula;l] l,enlist formula}
+
+tbaum:{[t;formula;l]
+ G:key parsea first formula:"~~" vs formula;
+ A:parsea A:last formula;
+ P:([]n:enlist(0#`)!first 0#/:t G;v:enlist 1b); 
+ n:raze {((,) scan key x)#\:x}@'{first@'parsea x}@'l;
+ P:1!P,([]n;v:1b);
+ 1!construct[T;G;P;A]
+ }
+
+sort:{[formula;t]
+ d:parsea formula; 
+ tsort[t;key d;value d]
+ }
+
+
+
+/ 
+
 // parallel variant
 
 / construct treetable (parallel)
@@ -125,14 +152,26 @@ pblock:{[t;g;a;p]
  f:$[g~key p;leaf;node g(`,g)?last key p];
  (`n_,g)xcols f[t;g;a;p]}
 
+/ 
+
 // example run
 
 / generate data for the base table t
 (:)c:count first m:1000#'flip cross/[(`a`b`c`d`e`;`f`g`h`i`j`k`l`m`;`n`o`p`q)]
 (:)T:([]A:m 0;B:m 1;C:m 2;D:c?.z.D + til 3;v:c?1000;w:c#`x`y`z`w)
-T
+
+tbaum[T;"A,D,B,C ~~ counts:count v,v:sum v,w:nul w"] open["A:`,B:2020.12.05"] open["A:`e"] ()
+
+sort["counts:idesc"] tbaum[T;"D,A,B,C ~~ counts:count v,v:sum v,w:nul w"] l:open["D:2020.12.06"] ()
+
+t:T;formula:"D,A,B,C ~~ counts:count v,v:sum v,w:nul w"
+
+
+
+
+
 / dimensions to group on (we can vary the order and number)
-G:`D`A`B`C
+G:`A`D`B`C
 G:`A`B`C
 
 / rollups (nul is the default rollup)
@@ -145,38 +184,16 @@ A:`counts`v`w!((count;`v);(sum;`v);(nul;`w))
 / we can drill into T
 (:)P1:P                            / initial state
 (:)R1:construct[T;G;P1;A]			/ construct root and children 
-(:)P2:openat[P1;G;2020.12.05]              / open at A=a
+(:)P2:openat[P1;G;`]              / open at A=a
 (:)R2:construct[T;G;P2;A]			/ construct with one node open
 
-tsort[R2;1#`counts;1#idesc]
+tsort[R2;1#`A;1#idesc]
 
 
 
+tbaum[T;"A,D,B,C ~~ counts:count v,v:sum v,w:nul w"] open["A:`,B:2020.12.05"] open["A:`e"] ()
 
-I:tsort[R2;1#`counts;1#idesc]
-1!(0!R2)I
-
-`t`c`o set' (R2;1#`counts;1#idesc)
-
-(0!t) 3 4 0 1 2 5 6 7 8 9
-
-tsort:{[t;c;o]
- n:exec n_ from t;
- i:children[parent n]except enlist();
- j:msort[0!t;c;o]each i;
- I:n?pmesh over n j;
- 1!(0!t)I
- }
-
-tsort[1!(0!t) 3 4 0 1 2 5 6 7 8 9;1#`counts;1#idesc]
-
-parent:{[n]
- n?-1_'n
- }
-
-([]num:til count n;n;p:parent n)
-
-
+sort["counts:iasc"] tbaum[T;"A,D,B,C ~~ counts:count v,v:sum v,w:nul w"] open["A:`"] ()
 
 
 (:)P3:openat[P2;G;``]			/ open at A=a,B=f
